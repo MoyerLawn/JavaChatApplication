@@ -1,0 +1,23 @@
+.base {
+	-fx-font-family: "Segoe UI"; /* Some fonts appear blurry */
+    -fx-font-smoothing-type: lcd; /* or grayscale, gray, or aliasing */
+    -fx-background-color: #f4f4f4;
+    -fx-padding: 10;
+}
+
+.custom-button {
+	-fx-background-color: #4CAF50; /* Green background color */
+	-fx-text-fill: white;
+}
+
+.header-text {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-fill: #333333; /* Dark gray text color */
+}
+
+.custom-list-view {
+    -fx-background-color: #ffffff; /* White background color */
+    -fx-border-color: #dddddd; /* Light gray border color */
+    -fx-text-fill: #333333; /* Dark gray text color */
+}

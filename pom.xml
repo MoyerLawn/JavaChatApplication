@@ -2,7 +2,16 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>lawn.moyer</groupId>
   <artifactId>real-time-chat-application</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <name>JavaChatApplication</name>
   <description>This project aims to create a user-friendly and interactive chat experience, allowing users to join chat rooms, send messages, and engage in private conversations.</description>
+
+	<dependencies>
+	  <dependency>
+		  <groupId>org.openjfx</groupId>
+		  <artifactId>javafx-controls</artifactId>
+		  <version>16</version>
+	  </dependency>
+  </dependencies>
+
 </project>
