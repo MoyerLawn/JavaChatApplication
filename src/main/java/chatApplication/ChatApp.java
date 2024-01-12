@@ -1,26 +1,12 @@
 package chatApplication;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
@@ -37,18 +23,17 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class ChatApp extends Application
 {
-    
+    private ChatRoomManager chatRoomManager = new ChatRoomManager();
+    private UIManager userInterfaceManager = new UIManager();
+    private ChatMessageManager chatMessageManager = new ChatMessageManager();
+    private UserAuthenticator userAuthenticator = new UserAuthenticator();
     private TextField usernameField = new TextField();
     private PasswordField passwordField = new PasswordField();
-    private ChatMessageManager chatMessageManager = new ChatMessageManager();
     GridPane gridPane = new GridPane();
-    private ChatRoomManager chatRoomManager;
     private Stage primaryStage;
-    private UserAuthenticator userAuthenticator = new UserAuthenticator();
     
     public static void main(String[] args) {
         launch(args);
@@ -56,9 +41,7 @@ public class ChatApp extends Application
     
     @Override
     public void start (Stage primaryStage) throws Exception
-    {
-        chatRoomManager = new ChatRoomManager();
-        
+    {   
         //Load chat rooms from saved list
         chatRoomManager.loadChatRooms();
         
@@ -76,6 +59,11 @@ public class ChatApp extends Application
         primaryStage.heightProperty().addListener((obs, oldHeight, newHeight) -> handleResize());
         
         primaryStage.show();
+    }
+    
+    private void exitChatRoomApplication ()
+    {
+        primaryStage.close();
     }
     
     private void handleResize() {
@@ -119,7 +107,7 @@ public class ChatApp extends Application
             if (isAuthenticated) {
                 showChatRoomSelectionScreen(true);
             } else {
-                showWarningAlert("Authentication Failed", "Invalid username or password. Please try again.");
+                userInterfaceManager.showWarningAlert("Authentication Failed", "Invalid username or password. Please try again.");
             }
         });
 
@@ -133,7 +121,7 @@ public class ChatApp extends Application
         gridPane.add(buttonBox, 1, 3);
         gridPane.setAlignment(Pos.CENTER);
 
-        Text versionText = new Text("Chat App v0.2");
+        Text versionText = new Text("Chat App v0.3.0");
         versionText.setFill(Color.GRAY);
         versionText.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
@@ -146,11 +134,6 @@ public class ChatApp extends Application
         Scene loginScene = new Scene(vbox, 400, 300);
         loginScene.getStylesheets().add("/chatApplication/styles.css");
         primaryStage.setScene(loginScene);
-    }
-
-    private void exitChatRoomApplication ()
-    {
-        primaryStage.close();
     }
 
     private void showChatRoomSelectionScreen(boolean fadeTransition) {
@@ -173,7 +156,7 @@ public class ChatApp extends Application
             if (selectedRoom != null) {
                 showChatRoomScreen(selectedRoom);
             } else {
-                showWarningAlert("Select a room", "Please select a room before joining.");
+                userInterfaceManager.showWarningAlert("Select a room", "Please select a room before joining.");
             }
         });
         
@@ -193,13 +176,13 @@ public class ChatApp extends Application
         deleteRoomButton.setOnAction(e -> {
             String roomToDelete = chatRoomsListView.getSelectionModel().getSelectedItem();
             if (roomToDelete != null && !roomToDelete.isEmpty()) {
-                boolean confirmDelete = promptToDeleteRoom(roomToDelete);
+                boolean confirmDelete = userInterfaceManager.promptToDeleteRoom(roomToDelete);
                 if (confirmDelete) {
                     chatRoomManager.removeChatRoom(roomToDelete);
                     showChatRoomSelectionScreen(false);
                 }
             } else {
-                showWarningAlert("No Room Selected", "Please select a room to delete.");
+                userInterfaceManager.showWarningAlert("No Room Selected", "Please select a room to delete.");
             }
         });
         
@@ -213,16 +196,8 @@ public class ChatApp extends Application
 
         Scene chatRoomSelectionScene = new Scene(vbox, 400, 300);
         chatRoomSelectionScene.getStylesheets().add("/chatApplication/styles.css");
-        applyFadeTransition(chatRoomSelectionScene, fadeTransition);
+        userInterfaceManager.applyFadeTransition(chatRoomSelectionScene, fadeTransition);
         primaryStage.setScene(chatRoomSelectionScene);
-    }
-    
-    private void showWarningAlert (String headerText, String message)
-    {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setHeaderText(headerText);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     private void showChatRoomScreen(String selectedRoom) {
@@ -264,20 +239,6 @@ public class ChatApp extends Application
         chatRoomScene.getStylesheets().add("/chatApplication/styles.css");
         primaryStage.setScene(chatRoomScene);
     }
-    
-    private boolean showConfirmationAlert(String title, String headerText, String contentText) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(headerText);
-        alert.setContentText(contentText);
-
-        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
-        alert.getButtonTypes().setAll(yesButton, noButton);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == yesButton;
-    }
 
     private void sendMessage (TextArea chatArea, String room, String message, TextField messageField, TextField username)
     {
@@ -288,22 +249,5 @@ public class ChatApp extends Application
             chatArea.appendText(username.getText() + ": " + message + "\n");
             messageField.clear();
         }
-    }
-    
-    private void applyFadeTransition(Scene scene, boolean forward) {
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), scene.getRoot());
-        
-        if (forward) {
-            fadeTransition.setFromValue(0.0);
-            fadeTransition.setToValue(1.0);   
-        } else {
-            //Do nothing
-        }
-        
-        fadeTransition.play();
-    }
-
-    private boolean promptToDeleteRoom(String roomToDelete) {
-        return showConfirmationAlert("Delete Room", "You are about to delete " + roomToDelete + "!", "Do you want to delete this room?");
     }
 }
