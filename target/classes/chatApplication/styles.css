@@ -5,7 +5,7 @@
     -fx-padding: 10;
 }
 
-.custom-button {
+.custom-button-green {
 	-fx-background-color: #4CAF50; /* Green background color */
 	-fx-text-fill: white;
 }
@@ -20,4 +20,9 @@
     -fx-background-color: #ffffff; /* White background color */
     -fx-border-color: #dddddd; /* Light gray border color */
     -fx-text-fill: #333333; /* Dark gray text color */
+}
+
+.custom-button-red {
+	-fx-background-color: #FF0000;
+	-fx-text-fill: white;
 }

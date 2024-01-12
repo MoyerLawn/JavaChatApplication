@@ -1,5 +1,17 @@
 package chatApplication;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -7,6 +19,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
@@ -21,13 +35,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class ChatApp extends Application
 {
+    
+    private TextField usernameField = new TextField();
+    private PasswordField passwordField = new PasswordField();
+    private ChatMessageManager chatMessageManager = new ChatMessageManager();
     GridPane gridPane = new GridPane();
+    private ChatRoomManager chatRoomManager;
     private Stage primaryStage;
+    private UserAuthenticator userAuthenticator = new UserAuthenticator();
     
     public static void main(String[] args) {
         launch(args);
@@ -36,6 +57,11 @@ public class ChatApp extends Application
     @Override
     public void start (Stage primaryStage) throws Exception
     {
+        chatRoomManager = new ChatRoomManager();
+        
+        //Load chat rooms from saved list
+        chatRoomManager.loadChatRooms();
+        
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Chat Application");
 
@@ -62,9 +88,6 @@ public class ChatApp extends Application
 
     
     private void showLoginScreen() {
-        TextField usernameField = new TextField();
-        PasswordField passwordField = new PasswordField();
-
         Label usernameLabel = new Label("Username:");
         Label passwordLabel = new Label("Password:");
 
@@ -87,10 +110,16 @@ public class ChatApp extends Application
 
         Button loginButton = new Button("Login");
         loginButton.setOnAction(e -> {
-            if (!usernameField.getText().isEmpty() && !passwordField.getText().isEmpty()) {
+            String username = usernameField.getText();
+            String password = passwordField.getText();
+            
+            //Authenticate user
+            boolean isAuthenticated = userAuthenticator.authenticateUser(username, password);
+            
+            if (isAuthenticated) {
                 showChatRoomSelectionScreen(true);
             } else {
-                showWarningAlert("Incomplete Information", "Please enter both username and password.");
+                showWarningAlert("Authentication Failed", "Invalid username or password. Please try again.");
             }
         });
 
@@ -127,10 +156,18 @@ public class ChatApp extends Application
     private void showChatRoomSelectionScreen(boolean fadeTransition) {
         ListView<String> chatRoomsListView = new ListView<>();
         chatRoomsListView.getStyleClass().add("custom-list-view");
-        chatRoomsListView.getItems().addAll("Room 1", "Room 2", "Room 3");
+        chatRoomsListView.getItems().addAll(chatRoomManager.getChatRooms());
+        
+        TextField newRoomField = new TextField();
+        newRoomField.setPromptText("Enter new room name");
+        
+        Text descriptionText = new Text("Welcome to the Chat Room Selection Screen.\n\n"
+                + "Here, you can view available chat rooms, join an existing room,\n"
+                + "create a new room, or delete a room.");
+        descriptionText.setTextAlignment(TextAlignment.JUSTIFY);
         
         Button joinButton = new Button("Join");
-        joinButton.getStyleClass().add("custom-button");
+        joinButton.getStyleClass().add("custom-button-green");
         joinButton.setOnAction(e -> {
             String selectedRoom = chatRoomsListView.getSelectionModel().getSelectedItem();
             if (selectedRoom != null) {
@@ -140,14 +177,37 @@ public class ChatApp extends Application
             }
         });
         
+        Button createRoomButton = new Button("Create Room");
+        createRoomButton.getStyleClass().add("custom-button-green");
+        createRoomButton.setOnAction(e -> {
+            String newRoomName = newRoomField.getText();
+            chatRoomManager.addChatRoom(newRoomName);
+            showChatRoomSelectionScreen(false);
+        });
+        
         Button leaveChatRoomButton = new Button("Back");
         leaveChatRoomButton.setOnAction(e -> showLoginScreen());
         
-        HBox buttonBox = new HBox(10, joinButton, leaveChatRoomButton);
+        Button deleteRoomButton = new Button("Delete Room");
+        deleteRoomButton.getStyleClass().add("custom-button-red");
+        deleteRoomButton.setOnAction(e -> {
+            String roomToDelete = chatRoomsListView.getSelectionModel().getSelectedItem();
+            if (roomToDelete != null && !roomToDelete.isEmpty()) {
+                boolean confirmDelete = promptToDeleteRoom(roomToDelete);
+                if (confirmDelete) {
+                    chatRoomManager.removeChatRoom(roomToDelete);
+                    showChatRoomSelectionScreen(false);
+                }
+            } else {
+                showWarningAlert("No Room Selected", "Please select a room to delete.");
+            }
+        });
+        
+        HBox buttonBox = new HBox(10, joinButton, createRoomButton, deleteRoomButton, leaveChatRoomButton);
         buttonBox.setPadding(new Insets(5, 5, 5, 5));
         buttonBox.setAlignment(Pos.CENTER);
 
-        VBox vbox = new VBox(chatRoomsListView, buttonBox); // Use the HBox for buttons
+        VBox vbox = new VBox(descriptionText, chatRoomsListView, newRoomField, buttonBox); // Use the HBox for buttons
         vbox.setSpacing(10);
         vbox.setPadding(new Insets(5, 5, 5, 5));
 
@@ -168,12 +228,18 @@ public class ChatApp extends Application
     private void showChatRoomScreen(String selectedRoom) {
         TextArea chatArea = new TextArea();
         chatArea.setEditable(false);
-        chatArea.appendText("Welcome to Chat " + selectedRoom + ".\nFeel free to discuss whatever topics you like. Please respect others.\n");
+        chatArea.appendText("Welcome to Chat Room: " + selectedRoom + ".\nFeel free to discuss whatever topics you like. Please respect others.\n");
+        
+        //Retrieve existing messages for the selected room
+        List<String> existingMessages = chatMessageManager.getMessages(selectedRoom);
+        for (String message : existingMessages) {
+            chatArea.appendText(message + "\n");
+        }
         
         TextField messageField = new TextField();
         
         Button sendButton = new Button("Send");
-        sendButton.setOnAction(e -> sendMessage(messageField.getText()));
+        sendButton.setOnAction(e -> sendMessage(chatArea, selectedRoom, messageField.getText(), messageField, usernameField));
         
         Button leaveChatRoomButton = new Button("Back");
         leaveChatRoomButton.setOnAction(e -> showChatRoomSelectionScreen(false));
@@ -198,10 +264,30 @@ public class ChatApp extends Application
         chatRoomScene.getStylesheets().add("/chatApplication/styles.css");
         primaryStage.setScene(chatRoomScene);
     }
+    
+    private boolean showConfirmationAlert(String title, String headerText, String contentText) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(contentText);
 
-    private void sendMessage (String text)
+        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == yesButton;
+    }
+
+    private void sendMessage (TextArea chatArea, String room, String message, TextField messageField, TextField username)
     {
-        // TODO Auto-generated method stub
+        if (!message.isEmpty()) {
+            chatMessageManager.addMessage(room, username.getText(), message);
+            
+            //Update UI to display the new message
+            chatArea.appendText(username.getText() + ": " + message + "\n");
+            messageField.clear();
+        }
     }
     
     private void applyFadeTransition(Scene scene, boolean forward) {
@@ -217,4 +303,7 @@ public class ChatApp extends Application
         fadeTransition.play();
     }
 
+    private boolean promptToDeleteRoom(String roomToDelete) {
+        return showConfirmationAlert("Delete Room", "You are about to delete " + roomToDelete + "!", "Do you want to delete this room?");
+    }
 }
