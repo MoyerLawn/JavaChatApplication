@@ -122,7 +122,7 @@ public class ChatApp extends Application
         gridPane.add(buttonBox, 1, 3);
         gridPane.setAlignment(Pos.CENTER);
 
-        Text versionText = new Text("Chat App v0.4.0");
+        Text versionText = new Text("Chat App v0.4.1");
         versionText.setFill(Color.GRAY);
         versionText.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
