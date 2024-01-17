@@ -32,7 +32,6 @@ public class ChatApp extends Application
     private UserAuthenticator userAuthenticator = new UserAuthenticator();
     private TextField usernameField = new TextField();
     private PasswordField passwordField = new PasswordField();
-    GridPane gridPane = new GridPane();
     private Stage primaryStage;
     private static final String CSS_STYLING_FILE = "styles.css";
     
@@ -68,6 +67,7 @@ public class ChatApp extends Application
     }
     
     private void handleResize() {
+        GridPane gridPane = new GridPane();
         double newWidth = primaryStage.getWidth();
         double newHeight = primaryStage.getHeight();
 
@@ -77,6 +77,7 @@ public class ChatApp extends Application
 
     
     private void showLoginScreen() {
+        GridPane gridPane = new GridPane();
         Label usernameLabel = new Label("Username:");
         Label passwordLabel = new Label("Password:");
 
