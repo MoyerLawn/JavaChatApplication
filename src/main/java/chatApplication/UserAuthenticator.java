@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UserAuthenticator {
     
-    private static final String USER_DATA_FILE = "user_data.json";
+    private static final String USER_DATA_FILE = "src/main/resources/user_data.json";
     private UIManager userInterfaceManager = new UIManager();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     

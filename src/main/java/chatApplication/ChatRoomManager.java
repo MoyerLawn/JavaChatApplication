@@ -17,6 +17,7 @@ import java.util.List;
 public class ChatRoomManager {
     
     private List<String> chatRooms;
+    private static final String CHAT_ROOM_FILE = "src/main/resources/chatRooms.txt";
     
     public ChatRoomManager() {
         this.chatRooms = new ArrayList<>();
@@ -40,7 +41,7 @@ public class ChatRoomManager {
     }
     
     public void loadChatRooms() {
-        File file = new File("chatRooms.txt");
+        File file = new File(CHAT_ROOM_FILE);
 
         try {
             if (!file.exists()) {
@@ -59,7 +60,7 @@ public class ChatRoomManager {
     }
 
     public void saveChatRooms() {
-        File file = new File("chatRooms.txt");
+        File file = new File(CHAT_ROOM_FILE);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             for (String room : chatRooms) {

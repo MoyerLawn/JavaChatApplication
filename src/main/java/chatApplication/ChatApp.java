@@ -34,6 +34,7 @@ public class ChatApp extends Application
     private PasswordField passwordField = new PasswordField();
     GridPane gridPane = new GridPane();
     private Stage primaryStage;
+    private static final String CSS_STYLING_FILE = "styles.css";
     
     public static void main(String[] args) {
         launch(args);
@@ -132,7 +133,7 @@ public class ChatApp extends Application
         vbox.getStyleClass().add("base");
 
         Scene loginScene = new Scene(vbox, 400, 300);
-        loginScene.getStylesheets().add("/chatApplication/styles.css");
+        loginScene.getStylesheets().add(CSS_STYLING_FILE);
         primaryStage.setScene(loginScene);
     }
 
@@ -195,7 +196,7 @@ public class ChatApp extends Application
         vbox.setPadding(new Insets(5, 5, 5, 5));
 
         Scene chatRoomSelectionScene = new Scene(vbox, 400, 300);
-        chatRoomSelectionScene.getStylesheets().add("/chatApplication/styles.css");
+        chatRoomSelectionScene.getStylesheets().add(CSS_STYLING_FILE);
         userInterfaceManager.applyFadeTransition(chatRoomSelectionScene, fadeTransition);
         primaryStage.setScene(chatRoomSelectionScene);
     }
@@ -236,7 +237,7 @@ public class ChatApp extends Application
         vbox.setSpacing(10);
         
         Scene chatRoomScene = new Scene(vbox, 400, 300);
-        chatRoomScene.getStylesheets().add("/chatApplication/styles.css");
+        chatRoomScene.getStylesheets().add(CSS_STYLING_FILE);
         primaryStage.setScene(chatRoomScene);
     }
 
