@@ -26,14 +26,19 @@ import javafx.stage.Stage;
 
 public class ChatApp extends Application
 {
-    private ChatRoomManager chatRoomManager = new ChatRoomManager();
-    private UIManager userInterfaceManager = new UIManager();
-    private ChatMessageManager chatMessageManager = new ChatMessageManager();
-    private UserAuthenticator userAuthenticator = new UserAuthenticator();
-    private TextField usernameField = new TextField();
-    private PasswordField passwordField = new PasswordField();
-    private Stage primaryStage;
+    
+    // Constants
     private static final String CSS_STYLING_FILE = "styles.css";
+    private static final String APP_VERSION = "Chat App v0.5.1";
+    
+    // Fields encapsulation
+    private final ChatRoomManager chatRoomManager = new ChatRoomManager();
+    private final UIManager userInterfaceManager = new UIManager();
+    private final ChatMessageManager chatMessageManager = new ChatMessageManager();
+    private final UserAuthenticator userAuthenticator = new UserAuthenticator();
+    private final TextField usernameField = new TextField();
+    private final PasswordField passwordField = new PasswordField();
+    private Stage primaryStage;
     
     public static void main(String[] args) {
         launch(args);
@@ -123,7 +128,7 @@ public class ChatApp extends Application
         gridPane.add(buttonBox, 1, 3);
         gridPane.setAlignment(Pos.CENTER);
 
-        Text versionText = new Text("Chat App v0.4.1");
+        Text versionText = new Text(APP_VERSION);
         versionText.setFill(Color.GRAY);
         versionText.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
