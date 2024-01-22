@@ -18,6 +18,8 @@ The Chat Application is a simple JavaFX-based messaging application that allows 
 
 - **CSS:** This allows us to add some styling to our interface, including button and text colors for a better user experience.
 
+- **bcrypt:** The User Authentication feature in this chat application utilizes the bcrypt hashing algorithm to securely store and verify user passwords, enhancing the overall security of user accounts.
+
 ## How to Run the Application
 
 1. **Clone the Repository:**
