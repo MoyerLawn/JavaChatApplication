@@ -16,6 +16,8 @@ The Chat Application is a simple JavaFX-based messaging application that allows 
 
 - **JavaFX:** The graphical user interface is developed using JavaFX, a Java library for building rich desktop applications.
 
+- **CSS:** This allows us to add some styling to our interface, including button and text colors for a better user experience.
+
 ## How to Run the Application
 
 1. **Clone the Repository:**
@@ -34,7 +36,7 @@ java --module-path "path/to/javafx-sdk/lib" --add-modules javafx.controls,javafx
 
 - The application uses CSS for styling. The styles are defined in the `styles.css` file.
 
-- The code is organized into separate classes for better maintainability. You can find the main application logic in the `ChatApp.java` file, and each screen has its own class (e.g., `LoginScreen.java`, `ChatRoomSelectionScreen.java`, `ChatRoomScreen.java`).
+- The code is organized into separate classes for better maintainability. You can find the main application logic in the `ChatApp.java` file, and each screen has its own class (e.g., `ChatMessageManager.java`, `ChatRoomManager.java`, `UseAuthenticator.java`, etc.).
 
 - Feel free to explore and customize the application based on your requirements.
 
